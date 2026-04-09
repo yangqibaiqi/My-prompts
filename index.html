@@ -3,69 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>空间设计提示词图库</title>
+    <title>Leader Prompt Gallery</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f7f9fc; margin: 0; color: #333; }
-        header { text-align: center; padding: 30px 20px; background: #fff; border-bottom: 1px solid #eaeaea; }
-        h1 { margin: 0; font-size: 26px; }
-        .subtitle { color: #888; font-size: 14px; margin-top: 5px; }
+        /* 全局重置，防止层级冲突 */
+        * { box-sizing: border-box; }
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; }
         
-        /* 布局容器 */
-        .gallery-container { display: flex; padding: 20px; max-width: 1400px; margin: 0 auto; gap: 30px; }
+        header { background: #fff; padding: 30px; text-align: center; border-bottom: 1px solid #eee; }
         
-        /* 侧边栏样式 */
-        .sidebar { width: 240px; flex-shrink: 0; }
+        /* 核心布局：确保侧边栏和内容区完全分离 */
+        .main-wrapper { display: flex; max-width: 1400px; margin: 20px auto; padding: 0 20px; gap: 20px; }
+        
+        /* 侧边栏：增加 z-index 确保可点 */
+        .sidebar { width: 260px; flex-shrink: 0; position: sticky; top: 20px; height: fit-content; z-index: 10; }
         .sidebar-item { 
-            padding: 12px 20px; 
-            margin-bottom: 10px; 
-            background: #fff; 
-            border: 1px solid #eee;
-            border-radius: 30px; 
-            font-size: 14px; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-            text-align: center;
+            background: #fff; padding: 15px 20px; margin-bottom: 10px; 
+            border-radius: 12px; cursor: pointer; border: 1px solid #ddd;
+            transition: all 0.2s; font-size: 14px; color: #555;
         }
-        .sidebar-item:hover { background: #f0f0f0; }
-        .sidebar-item.active { background: #333; color: white; border-color: #333; font-weight: bold; }
-        
-        /* 图片网格样式 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; flex-grow: 1; }
-        .card { 
-            background: #fff; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-            cursor: pointer; 
-            transition: transform 0.2s; 
-            height: fit-content;
-        }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
-        .card-info { padding: 15px; border-top: 1px solid #f9f9f9; }
-        .card-title { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
-        .card-author { color: #aaa; font-size: 12px; }
+        .sidebar-item:hover { border-color: #333; background: #f9f9f9; }
+        .sidebar-item.active { background: #333; color: #fff; border-color: #333; font-weight: bold; }
 
-        /* 弹窗样式 */
+        /* 展示区 */
+        .content-area { flex-grow: 1; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        .card { 
+            background: #fff; border-radius: 15px; overflow: hidden; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; 
+            transition: 0.3s; border: 1px solid transparent;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: #007bff; }
+        .card img { width: 100%; height: 220px; object-fit: cover; pointer-events: none; } /* 禁止图片拦截点击 */
+        .card-info { padding: 15px; }
+        .card-title { font-weight: bold; font-size: 15px; margin: 0 0 5px 0; }
+        .card-author { color: #999; font-size: 12px; }
+
+        /* 弹窗：最高优先级 */
         .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); 
-            z-index: 2000; 
-            justify-content: center; 
-            align-items: center; 
-            backdrop-filter: blur(4px);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; 
         }
         .modal-content { 
-            background: #fff; 
-            width: 650px; 
-            max-width: 90%; 
-            border-radius: 20px; 
-            padding: 30px; 
-            position: relative; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: #fff; width: 600px; max-width: 95%; border-radius: 20px; 
+            padding: 30px; position: relative; animation: fadeIn 0.3s;
         }
-        .modal-title { margin-top: 0; font-size: 20px; }
-        .tags { display: flex; flex-wrap
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .prompt-box { 
+            background: #f1f3f5; padding: 20px; border-radius: 12px; margin: 20px 0;
+            font-size: 14px; line-height: 1.6; min-height: 150px; max-height: 300px;
+            overflow-y: auto; white-space: pre-wrap; border: 1px solid #e9ecef;
+        }
+
+        .btn-group { display: flex; gap: 10px; justify-content: center; }
+        .btn { padding: 12px 25px; border-radius: 30px; border: none; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .btn-gray { background: #eee; color: #333; }
+        .btn-blue { background: #007bff; color: #fff; }
+        
+        #toast { 
+            display: none; position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); 
+            background: #333; color: #fff; padding: 10px 30px; border-radius: 20px; z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Leader Prompt Gallery</h1>
+        <p style="color: #888;">AI 辅助城市规划与建筑设计作品集</p>
+    </header>
+
+    <div class="main-wrapper">
+        <div class="sidebar">
+            <div class="sidebar-item active" onclick="filterData('all', this)">📍 全部作品</div>
+            <div class="sidebar-item" onclick="filterData('cat-urban', this)">01_城市规划设计</div>
+            <div class="sidebar-item" onclick="filterData('cat-landscape', this)">02_景观拼贴效果</div>
+            <div class="sidebar-item" onclick="filterData('cat-facade', this)">03_立面风格迁移</div>
+        </div>
+
+        <div class="content-area">
+            <div class="grid">
+                <div class="card cat-urban" onclick="showModal('悉尼歌剧院分析图', '这是中文提示词：一份精美的建筑场地分析图，包含平面图、剖切图和实景图。', 'English Prompt: A refined architectural site analysis collage.')">
+                    <img src="image/architecture-analysis-001.jpeg" alt="项目图">
+                    <div class="card-info">
+                        <p class="card-title">悉尼歌剧院建筑分析</p>
+                        <p class="card-author">@Designer</p>
+                    </div>
+                </div>
+
+                <div class="card cat-landscape" onclick="showModal('景观拼贴展示', '这里是景观提示词：生态景观，滨水空间，分析标注。', 'Landscape Prompt: Ecological waterfront, site analysis.')">
+                    <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?auto=format&fit=crop&w=500&q=60" alt="项目图">
+                    <div class="card-info">
+                        <p class="card-title">02项目：景观拼贴案例</p>
+                        <p class="card-author">@LeaderAI</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalLayer">
+        <div class="modal-content">
+            <h2 id="m-title" style="margin-top:0">标题</h2>
+            <div class="prompt-box" id="m-prompt">内容加载中...</div>
+            <div class="btn-group">
+                <button class="btn btn-gray" onclick="changeLang()">中/英切换</button>
+                <button class="btn btn-gray" onclick="doCopy()">复制内容</button>
+                <button class="btn btn-gray" onclick="closeM()">关闭返回</button>
+                <button class="btn btn-blue">立即生成</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">复制成功！</div>
+
+    <script>
+        let cnText = '', enText = '', isCn = true;
+
+        // 过滤功能：确保侧边栏点击有效
+        function filterData(cat, el) {
+            // 样式切换
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            
+            // 卡片显示/隐藏
+            document.querySelectorAll('.card').forEach(c => {
+                if(cat === 'all' || c.classList.contains(cat)) {
+                    c.style.display = 'block';
+                } else {
+                    c.style.display = 'none';
+                }
+            });
+        }
+
+        // 弹窗功能：确保图片点击有效
+        function showModal(title, cn, en) {
+            cnText = cn; enText = en; isCn = true;
+            document.getElementById('m-title').innerText = title;
+            document.getElementById('m-prompt').innerText = cnText;
+            document.getElementById('modalLayer').style.display = 'flex';
+        }
+
+        function closeM() {
+            document.getElementById('modalLayer').style.display = 'none';
+        }
+
+        function changeLang() {
+            isCn = !isCn;
+            document.getElementById('m-prompt').innerText = isCn ? cnText : enText;
+        }
+
+        function doCopy() {
+            const t = document.getElementById('m-prompt').innerText;
+            navigator.clipboard.writeText(t).then(() => {
+                const s = document.getElementById('toast');
+                s.style.display = 'block';
+                setTimeout(() => s.style.display = 'none', 2000);
+            });
+        }
+
+        // 点击遮罩背景关闭
+        document.getElementById('modalLayer').addEventListener('click', function(e) {
+            if(e.target === this) closeM();
+        });
+    </script>
+</body>
+</html>
