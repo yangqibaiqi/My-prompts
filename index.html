@@ -5,96 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>空间设计提示词图库</title>
     <style>
-        /* 基础样式复刻截图风格 */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7f9fc; margin: 0; color: #333; }
-        header { text-align: center; padding: 40px 20px; background: #fff; border-bottom: 1px solid #eaeaea; }
-        h1 { margin: 0 0 10px 0; font-size: 28px; }
-        p.subtitle { color: #888; font-size: 14px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f7f9fc; margin: 0; color: #333; }
+        header { text-align: center; padding: 30px 20px; background: #fff; border-bottom: 1px solid #eaeaea; }
+        h1 { margin: 0; font-size: 26px; }
+        .subtitle { color: #888; font-size: 14px; margin-top: 5px; }
         
-        /* 画廊网格布局 */
-        .gallery-container { display: flex; padding: 20px; max-width: 1400px; margin: 0 auto; }
-        .sidebar { width: 220px; padding-right: 20px; }
-        .sidebar-item { padding: 12px 18px; margin-bottom: 8px; background: #eee; border-radius: 25px; font-size: 14px; cursor: pointer; transition: 0.3s; }
-        .sidebar-item:hover { background: #e0e0e0; }
-        .sidebar-item.active { background: #333; color: white; }
+        /* 布局容器 */
+        .gallery-container { display: flex; padding: 20px; max-width: 1400px; margin: 0 auto; gap: 30px; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; flex: 1; align-content: start; }
-        /* 默认显示所有卡片 */
-        .card { display: block; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .card-info { padding: 15px; }
-        .card-title { font-weight: bold; margin-bottom: 5px; font-size: 15px; }
-        .card-author { color: #888; font-size: 12px; }
-
-        /* 弹窗 (Modal) 样式 */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; width: 600px; max-width: 90%; border-radius: 16px; padding: 30px; position: relative; }
-        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .tag { background: #f0f0f0; padding: 5px 12px; border-radius: 15px; font-size: 12px; color: #555; }
-        .prompt-box { background: #f9f9f9; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; min-height: 100px; max-height: 300px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; white-space: pre-wrap; }
+        /* 侧边栏样式 */
+        .sidebar { width: 240px; flex-shrink: 0; }
+        .sidebar-item { 
+            padding: 12px 20px; 
+            margin-bottom: 10px; 
+            background: #fff; 
+            border: 1px solid #eee;
+            border-radius: 30px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .sidebar-item:hover { background: #f0f0f0; }
+        .sidebar-item.active { background: #333; color: white; border-color: #333; font-weight: bold; }
         
-        /* 按钮组 */
-        .btn-group { display: flex; justify-content: center; gap: 15px; }
-        .btn { padding: 10px 24px; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .btn-default { background: #f0f0f0; color: #333; }
-        .btn-default:hover { background: #e0e0e0; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-primary:hover { background: #0056b3; }
-        
-        /* 提示信息 */
-        #toast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 8px; z-index: 1001; }
-    </style>
-</head>
-<body>
+        /* 图片网格样式 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; flex-grow: 1; }
+        .card { 
+            background: #fff; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            cursor: pointer; 
+            transition: transform 0.2s; 
+            height: fit-content;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .card-info { padding: 15px; border-top: 1px solid #f9f9f9; }
+        .card-title { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
+        .card-author { color: #aaa; font-size: 12px; }
 
-    <header>
-        <h1>My Prompt Gallery</h1>
-        <p class="subtitle">空间设计与建筑AI辅助提示词库</p>
-    </header>
-
-    <div class="gallery-container">
-        <div class="sidebar">
-            <div class="sidebar-item active" onclick="filterCategory('all', this)">全部作品</div>
-            <div class="sidebar-item" onclick="filterCategory('cat-urban', this)">01_城市规划设计分析图</div>
-            <div class="sidebar-item" onclick="filterCategory('cat-landscape', this)">02_景观拼贴效果图</div>
-            <div class="sidebar-item" onclick="filterCategory('cat-facade', this)">03_立面体块风格迁移</div>
-        </div>
-
-        <div class="grid" id="imageGrid">
-            
-            <div class="card cat-urban" onclick="openModal('悉尼歌剧院建筑效果图分析', '一份文物保护建筑师绘制的勘测图...（此处省略你的中文词）', 'A refined mixed-media architectural site analysis collage...')">
-                <img src="image/architecture-analysis-001.jpeg" alt="建筑分析图">
-                <div class="card-info">
-                    <div class="card-title">悉尼歌剧院建筑效果图分析</div>
-                    <div class="card-author">@Designer</div>
-                </div>
-            </div>
-
-            <div class="card cat-landscape" onclick="openModal('景观意向拼贴', '这里填入你景观拼贴的中文提示词，比如：生态驳岸、水彩风格、植物群落标注等。', 'Enter your English prompt for landscape collage here.')">
-                <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="景观图">
-                <div class="card-info">
-                    <div class="card-title">滨水景观意向展示</div>
-                    <div class="card-author">@LeaderAI</div>
-                </div>
-            </div>
-            
-             <div class="card cat-facade" onclick="openModal('参数化立面设计', '参数化表皮，流线型几何体，穿孔金属板材质，极简主义。', 'Parametric facade, streamlined geometry, perforated metal panels.')">
-                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="立面图">
-                <div class="card-info">
-                    <div class="card-title">立面体块风格迁移</div>
-                    <div class="card-author">@Architect</div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal">
-        <div class="modal-content">
-            <h2 id="modal-title">标题</h2>
-            <div class="tags">
-                <span class="tag">AI设计</span><span class="tag">提示词</span><span class="tag">作品集</span>
-            </div>
-            <div class="prompt-box" id="prompt-text">提示词加载中...</div>
-            <div class
+        /* 弹窗样式 */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 2000; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(4px);
+        }
+        .modal-content { 
+            background: #fff; 
+            width: 650px; 
+            max-width: 90%; 
+            border-radius: 20px; 
+            padding: 30px; 
+            position: relative; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .modal-title { margin-top: 0; font-size: 20px; }
+        .tags { display: flex; flex-wrap
