@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的空间设计提示词图库</title>
+    <style>
+        /* 基础样式复刻截图风格 */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f7f9fc; margin: 0; color: #333; }
+        header { text-align: center; padding: 40px 20px; background: #fff; border-bottom: 1px solid #eaeaea; }
+        h1 { margin: 0 0 10px 0; font-size: 28px; }
+        p.subtitle { color: #888; font-size: 14px; }
+        
+        /* 画廊网格布局 */
+        .gallery-container { display: flex; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .sidebar { width: 200px; padding-right: 20px; }
+        .sidebar-item { padding: 10px; margin-bottom: 5px; background: #eee; border-radius: 20px; font-size: 14px; cursor: pointer; }
+        .sidebar-item.active { background: #333; color: white; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; flex: 1; }
+        .card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-info { padding: 15px; }
+        .card-title { font-weight: bold; margin-bottom: 5px; font-size: 15px; }
+        .card-author { color: #888; font-size: 12px; }
+
+        /* 弹窗 (Modal) 样式 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 600px; max-width: 90%; border-radius: 16px; padding: 30px; position: relative; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .tag { background: #f0f0f0; padding: 5px 12px; border-radius: 15px; font-size: 12px; color: #555; }
+        .prompt-box { background: #f9f9f9; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; min-height: 100px; margin-bottom: 20px; border: 1px solid #eee; }
+        
+        /* 按钮组 */
+        .btn-group { display: flex; justify-content: center; gap: 15px; }
+        .btn { padding: 10px 24px; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-default { background: #f0f0f0; color: #333; }
+        .btn-default:hover { background: #e0e0e0; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        
+        /* 提示信息 */
+        #toast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 8px; z-index: 1001; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>My Prompt Gallery</h1>
+        <p class="subtitle">空间设计与建筑AI辅助提示词库</p>
+    </header>
+
+    <div class="gallery-container">
+        <div class="sidebar">
+            <div class="sidebar-item active">01_建筑室内空间设计</div>
+            <div class="sidebar-item">02_景观拼贴效果图</div>
+            <div class="sidebar-item">03_立面体块风格迁移</div>
+        </div>
+
+        <div class="grid">
+            <div class="card" onclick="openModal('景观拼贴效果图', '一幅精致的混合媒介建筑场地分析拼贴画。其美学融合了复古技术绘图、象征性超现实主义和黄金比例构图。\\n1. 场地基础元素: 将场地特征转化为高对比度、低饱和度的黑白照片碎片...','A refined mixed-media architectural site analysis collage. The aesthetics blend vintage technical drawings, symbolic surrealism, and golden ratio composition...')">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="样例图片">
+                <div class="card-info">
+                    <div class="card-title">景观拼贴效果图</div>
+                    <div class="card-author">@Designer</div>
+                </div>
+            </div>
+            
+             <div class="card" onclick="openModal('建筑室内场景-替换材质', '极简主义室内设计，大面积落地窗，温暖的木质材质，自然光，真实感渲染，8k分辨率。','Minimalist interior design, large floor-to-ceiling windows, warm wood materials, natural light, photorealistic render, 8k resolution.')">
+                <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="样例图片">
+                <div class="card-info">
+                    <div class="card-title">建筑室内场景-替换材质</div>
+                    <div class="card-author">@Planner</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">标题</h2>
+            <div class="tags">
+                <span class="tag">拼贴</span><span class="tag">建筑</span><span class="tag">复古</span>
+            </div>
+            <div class="prompt-box" id="prompt-text">
+                提示词内容将显示在这里
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-default" onclick="toggleTranslate()">原/译文</button>
+                <button class="btn btn-default" onclick="copyPrompt()">复制</button>
+                <button class="btn btn-default" onclick="closeModal()">返回</button>
+                <button class="btn btn-primary">做同款</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">复制成功！</div>
+
+    <script>
+        let currentCnPrompt = '';
+        let currentEnPrompt = '';
+        let showingCn = true;
+
+        // 打开弹窗并载入数据
+        function openModal(title, cnPrompt, enPrompt) {
+            document.getElementById('modal-title').innerText = title;
+            currentCnPrompt = cnPrompt;
+            currentEnPrompt = enPrompt;
+            showingCn = true;
+            document.getElementById('prompt-text').innerText = currentCnPrompt;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // 中英切换
+        function toggleTranslate() {
+            showingCn = !showingCn;
+            document.getElementById('prompt-text').innerText = showingCn ? currentCnPrompt : currentEnPrompt;
+        }
+
+        // 复制功能
+        function copyPrompt() {
+            const textToCopy = document.getElementById('prompt-text').innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const toast = document.getElementById('toast');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2000);
+            }).catch(err => {
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        // 点击空白处关闭弹窗
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
