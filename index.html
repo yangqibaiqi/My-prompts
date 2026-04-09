@@ -13,12 +13,14 @@
         
         /* 画廊网格布局 */
         .gallery-container { display: flex; padding: 20px; max-width: 1400px; margin: 0 auto; }
-        .sidebar { width: 200px; padding-right: 20px; }
-        .sidebar-item { padding: 10px; margin-bottom: 5px; background: #eee; border-radius: 20px; font-size: 14px; cursor: pointer; }
+        .sidebar { width: 220px; padding-right: 20px; }
+        .sidebar-item { padding: 12px 18px; margin-bottom: 8px; background: #eee; border-radius: 25px; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .sidebar-item:hover { background: #e0e0e0; }
         .sidebar-item.active { background: #333; color: white; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; flex: 1; }
-        .card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; flex: 1; align-content: start; }
+        /* 默认显示所有卡片 */
+        .card { display: block; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
         .card:hover { transform: translateY(-5px); }
         .card img { width: 100%; height: 200px; object-fit: cover; }
         .card-info { padding: 15px; }
@@ -30,7 +32,7 @@
         .modal-content { background: #fff; width: 600px; max-width: 90%; border-radius: 16px; padding: 30px; position: relative; }
         .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { background: #f0f0f0; padding: 5px 12px; border-radius: 15px; font-size: 12px; color: #555; }
-        .prompt-box { background: #f9f9f9; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; min-height: 100px; margin-bottom: 20px; border: 1px solid #eee; }
+        .prompt-box { background: #f9f9f9; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.6; min-height: 100px; max-height: 300px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; white-space: pre-wrap; }
         
         /* 按钮组 */
         .btn-group { display: flex; justify-content: center; gap: 15px; }
@@ -53,27 +55,38 @@
 
     <div class="gallery-container">
         <div class="sidebar">
-            <div class="sidebar-item active">01_城市规划设计分析图</div>
-            <div class="sidebar-item">02_建筑设计分析图</div>
-            <div class="sidebar-item">03_立面体块风格迁移</div>
+            <div class="sidebar-item active" onclick="filterCategory('all', this)">全部作品</div>
+            <div class="sidebar-item" onclick="filterCategory('cat-urban', this)">01_城市规划设计分析图</div>
+            <div class="sidebar-item" onclick="filterCategory('cat-landscape', this)">02_景观拼贴效果图</div>
+            <div class="sidebar-item" onclick="filterCategory('cat-facade', this)">03_立面体块风格迁移</div>
         </div>
 
-        <div class="grid">
-            <div class="card" onclick="openModal('一份文物保护建筑师绘制的[建筑/结构]—[风格/建筑师/时期]勘测图。左侧部分：场地平面图及周边环境图，展示了建筑在城市或景观环境中的位置、朝向、阴影和邻近关系。中间部分：建筑剖析图，剖面轴测图展现了结构体系、材料层、隐藏的基础设施，并标注了原始元素和改建元素。右侧部分：建筑的实景图，以标准视角在理想光线下拍摄，并配有人物以体现比例和生活气息，展现了建筑的居住状态。视觉风格从技术勘测的蓝线过渡到中性分析的灰色，最终过渡到温暖的黄金色调。标题栏显示[建筑名称]—[建筑师]，[城市]，[年份]，遗产勘测。','A refined mixed-media architectural site analysis collage. The aesthetics blend vintage technical drawings, symbolic surrealism, and golden ratio composition...')">
+        <div class="grid" id="imageGrid">
+            
+            <div class="card cat-urban" onclick="openModal('悉尼歌剧院建筑效果图分析', '一份文物保护建筑师绘制的勘测图...（此处省略你的中文词）', 'A refined mixed-media architectural site analysis collage...')">
                 <img src="image/architecture-analysis-001.jpeg" alt="建筑分析图">
                 <div class="card-info">
                     <div class="card-title">悉尼歌剧院建筑效果图分析</div>
                     <div class="card-author">@Designer</div>
                 </div>
             </div>
-            
-             <div class="card" onclick="openModal('建筑室内场景-替换材质', '极简主义室内设计，大面积落地窗，温暖的木质材质，自然光，真实感渲染，8k分辨率。','Minimalist interior design, large floor-to-ceiling windows, warm wood materials, natural light, photorealistic render, 8k resolution.')">
-                <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="样例图片">
+
+            <div class="card cat-landscape" onclick="openModal('景观意向拼贴', '这里填入你景观拼贴的中文提示词，比如：生态驳岸、水彩风格、植物群落标注等。', 'Enter your English prompt for landscape collage here.')">
+                <img src="https://images.unsplash.com/photo-1558449028-b53a39d100fc?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="景观图">
                 <div class="card-info">
-                    <div class="card-title">建筑室内场景-替换材质</div>
-                    <div class="card-author">@Planner</div>
+                    <div class="card-title">滨水景观意向展示</div>
+                    <div class="card-author">@LeaderAI</div>
                 </div>
             </div>
+            
+             <div class="card cat-facade" onclick="openModal('参数化立面设计', '参数化表皮，流线型几何体，穿孔金属板材质，极简主义。', 'Parametric facade, streamlined geometry, perforated metal panels.')">
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="立面图">
+                <div class="card-info">
+                    <div class="card-title">立面体块风格迁移</div>
+                    <div class="card-author">@Architect</div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -81,64 +94,7 @@
         <div class="modal-content">
             <h2 id="modal-title">标题</h2>
             <div class="tags">
-                <span class="tag">拼贴</span><span class="tag">建筑</span><span class="tag">复古</span>
+                <span class="tag">AI设计</span><span class="tag">提示词</span><span class="tag">作品集</span>
             </div>
-            <div class="prompt-box" id="prompt-text">
-                提示词内容将显示在这里
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-default" onclick="toggleTranslate()">原/译文</button>
-                <button class="btn btn-default" onclick="copyPrompt()">复制</button>
-                <button class="btn btn-default" onclick="closeModal()">返回</button>
-                <button class="btn btn-primary">做同款</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast">复制成功！</div>
-
-    <script>
-        let currentCnPrompt = '';
-        let currentEnPrompt = '';
-        let showingCn = true;
-
-        // 打开弹窗并载入数据
-        function openModal(title, cnPrompt, enPrompt) {
-            document.getElementById('modal-title').innerText = title;
-            currentCnPrompt = cnPrompt;
-            currentEnPrompt = enPrompt;
-            showingCn = true;
-            document.getElementById('prompt-text').innerText = currentCnPrompt;
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        // 关闭弹窗
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        // 中英切换
-        function toggleTranslate() {
-            showingCn = !showingCn;
-            document.getElementById('prompt-text').innerText = showingCn ? currentCnPrompt : currentEnPrompt;
-        }
-
-        // 复制功能
-        function copyPrompt() {
-            const textToCopy = document.getElementById('prompt-text').innerText;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                const toast = document.getElementById('toast');
-                toast.style.display = 'block';
-                setTimeout(() => { toast.style.display = 'none'; }, 2000);
-            }).catch(err => {
-                alert('复制失败，请手动复制');
-            });
-        }
-
-        // 点击空白处关闭弹窗
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-    </script>
-</body>
-</html>
+            <div class="prompt-box" id="prompt-text">提示词加载中...</div>
+            <div class
